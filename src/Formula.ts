@@ -1,4 +1,5 @@
-import { AutomationContext, FormulaContext, ModelType } from "appbox-types";
+import { ModelType } from "appbox-types";
+import { AutomationContext } from "./Types";
 import DatabaseModel from "appbox-types/dist/Classes/DatabaseModel";
 import functions from "./Formulas/Functions";
 import { find } from "lodash";
@@ -154,41 +155,48 @@ export default class Formula {
           // Todo: add compiled argument whereas possible
           newArguments.push(curr);
         } else {
-          newArguments.push(curr.replace(/^['"]/g, "").replace(/['"]$/g, ""));
+          if (curr.charAt(0) === '"' || curr.charAt(0) === "'") {
+            newArguments.push({
+              str: curr.replace(/^['"]/g, "").replace(/['"]$/g, ""),
+            });
+          } else {
+            newArguments.push(curr);
+          }
         }
         return true;
       }, fArguments[0]);
 
       // Done looping, now preprocess the function
-      const deps = functions[fName].onCompile(newArguments);
-      deps.map((dep) => {
-        if (typeof dep === "string") {
-          // Check if one of the dependencies returned is a systemVar. These still need a value.
-          if (!Object.keys(this.systemVars).includes(dep)) {
-            this.dependencies.push({
-              model: this.model.key,
-              field: dep.trim(),
-              foreign: false,
-            });
-          } else {
-            // This is a system var. Take appropriate action.
-            if ((this.systemVarTriggers[dep] || {}).cron) {
-              // Time based trigger (such as __TODAY)
-              this.timeTriggers.push(this.systemVarTriggers[dep].cron);
+      if (functions[fName]) {
+        const deps = functions[fName].onCompile(newArguments);
+        deps.map((dep) => {
+          if (typeof dep === "string") {
+            // Check if one of the dependencies returned is a systemVar. These still need a value.
+            if (!Object.keys(this.systemVars).includes(dep)) {
+              this.dependencies.push({
+                model: this.model.key,
+                field: dep.trim(),
+                foreign: false,
+              });
+            } else {
+              // This is a system var. Take appropriate action.
+              if ((this.systemVarTriggers[dep] || {}).cron) {
+                // Time based trigger (such as __TODAY)
+                this.timeTriggers.push(this.systemVarTriggers[dep].cron);
+              }
             }
+          } else {
+            this.dependencies.push(dep);
           }
-        } else {
-          this.dependencies.push(dep);
-        }
-      });
+        });
+      } else {
+        console.log(`Unknown function ${fName}`);
+      }
       resolve();
     });
 
   // Use all the information available in this class after compilation and calculate it
-  calculate = async (
-    dataObj: {},
-    context: AutomationContext | FormulaContext
-  ) =>
+  calculate = async (dataObj: {}, context: AutomationContext) =>
     new Promise(async (resolve, reject) => {
       const data = { ...dataObj, __TODAY: new Date() };
       const regex = /\$___(?<tagName>.+?)___\$/gm;
@@ -242,7 +250,7 @@ export default class Formula {
             }
           }
 
-          if (parsedTag) {
+          if (parsedTag !== undefined) {
             return reducingFormula.replace(`$___${tagId}___$`, parsedTag);
           } else {
             return reducingFormula;
@@ -260,18 +268,13 @@ export default class Formula {
       resolve(output);
     });
 
-  processFunction = (
-    fName,
-    fArgs,
-    data: {},
-    context: AutomationContext | FormulaContext
-  ) =>
+  processFunction = (fName, fArgs, data: {}, context: AutomationContext) =>
     new Promise(async (resolve) => {
       //@ts-ignore
       const fArguments = fArgs.split(/,(?![^\(]*\))(?![^\[]*")(?![^\[]*")/gm); // Splits commas, except when they're in brackets or apostrophes
       const newArguments = await fArguments.reduce(async (prev, curr) => {
         const output = typeof prev === "string" ? [] : await prev;
-        let variable = curr.trim().replace(/^['"]|['"]$/g, ""); // Remove spaces and trailing apostrophes
+        let variable = curr.trim(); // Remove spaces and trailing apostrophes
 
         if (variable.match(/\w*\(.+\)/)) {
           // If one of the arguments contains a (sub) function, resolve that first, using this recurring function
@@ -292,13 +295,24 @@ export default class Formula {
           if (Object.keys(this.systemVars).includes(variable)) {
             variable = this.systemVars[variable];
           }
-          output.push(variable);
+          if (variable.charAt(0) === '"' || variable.charAt(0) === "'") {
+            output.push({
+              str: variable.replace(/^['"]/g, "").replace(/['"]$/g, ""),
+            });
+          } else {
+            output.push(variable);
+          }
         }
         return output;
       }, fArguments[0]);
-      resolve(
-        await functions[fName].execute(newArguments, data, this, context)
-      );
+      if (functions[fName]) {
+        resolve(
+          await functions[fName].execute(newArguments, data, this, context)
+        );
+      } else {
+        console.log(`Uknown function ${fName}`);
+        resolve();
+      }
     });
 
   // Turn a foreign relationship tag into a value

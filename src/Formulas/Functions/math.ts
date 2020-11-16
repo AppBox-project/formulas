@@ -21,7 +21,7 @@ export default {
   onCompile: (fArguments) => {
     // Loop through query and find all the {tags}.
     const deps = [];
-    fArguments[0]
+    fArguments[0].str
       .match(/{(.+?)}/gm)
       .map((dep) => deps.push(dep.substring(1, dep.length - 1)));
     return deps;
