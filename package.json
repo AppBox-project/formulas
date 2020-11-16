@@ -1,0 +1,13 @@
+{
+  "name": "appbox-formulas",
+  "version": "0.0.1",
+  "description": "Compiles AppBox-Formulas",
+  "main": "index.js",
+  "repository": "https://github.com/AppBox-project/formulas",
+  "author": "Vic van Cooten",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "typescript": "^4.0.5"
+  }
+}
