@@ -148,19 +148,20 @@ export default class Formula {
       const newArguments = [];
       // Loop through arguments (async) and if they are a function themselves, preprocess those first.
       await fArguments.reduce(async (prev, curr) => {
-        if (curr.match(/\w*\(.+\)/)) {
+        const variable = curr.trim();
+        if (variable.match(/\w*\(.+\)/)) {
           // This part has a function call. We need to preprocess these functions to figure out what the dependencies are.
           const func = new RegExp(/(?<fName>\w*)\((?<fArgs>.*)\)/gm).exec(curr);
           await this.preprocessFunction(func.groups.fName, func.groups.fArgs);
           // Todo: add compiled argument whereas possible
-          newArguments.push(curr);
+          newArguments.push(variable);
         } else {
-          if (curr.charAt(0) === '"' || curr.charAt(0) === "'") {
+          if (variable.charAt(0) === '"' || variable.charAt(0) === "'") {
             newArguments.push({
-              str: curr.replace(/^['"]/g, "").replace(/['"]$/g, ""),
+              str: variable.replace(/^['"]/g, "").replace(/['"]$/g, ""),
             });
           } else {
-            newArguments.push(curr);
+            newArguments.push(variable);
           }
         }
         return true;
