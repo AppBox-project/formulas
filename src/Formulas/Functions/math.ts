@@ -10,7 +10,7 @@ import Formula from "../../Formula";
 export default {
   execute: (fArguments, data, formula: Formula) =>
     new Promise((resolve) => {
-      let query = fArguments[0];
+      let query = fArguments[0].str;
       query.match(/{(.+?)}/gm).map((d) => {
         const dep = d.substring(1, d.length - 1);
         query = query.replace(`{${dep}}`, data[dep] || 0);
