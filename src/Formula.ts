@@ -296,10 +296,14 @@ export default class Formula {
           if (Object.keys(this.systemVars).includes(variable)) {
             variable = this.systemVars[variable];
           }
-          if (variable.charAt(0) === '"' || variable.charAt(0) === "'") {
-            output.push({
-              str: variable.replace(/^['"]/g, "").replace(/['"]$/g, ""),
-            });
+          if (typeof variable === "string") {
+            if (variable.charAt(0) === '"' || variable.charAt(0) === "'") {
+              output.push({
+                str: variable.replace(/^['"]/g, "").replace(/['"]$/g, ""),
+              });
+            } else {
+              output.push(variable);
+            }
           } else {
             output.push(variable);
           }

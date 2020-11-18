@@ -13,15 +13,15 @@ export default {
   execute: (fArgs, data, formula: Formula) =>
     new Promise((resolve) => {
       const date =
-        typeof fArgs[0] == "string"
-          ? typeof data[fArgs[0].trim()] === "string"
-            ? parseISO(data[fArgs[0].trim()])
-            : data[fArgs[0]]
+        typeof fArgs[0].str == "string"
+          ? typeof data[fArgs[0].str] === "string"
+            ? parseISO(data[fArgs[0].str])
+            : data[fArgs[0].str]
           : fArgs[0];
-      resolve(format(date, fArgs[1].trim()));
+      resolve(format(date, fArgs[1].str));
     }),
   onCompile: (fArguments) => {
     // Mark argument 0 as required
-    return [fArguments[0].trim()];
+    return [fArguments[0].str];
   },
 };
