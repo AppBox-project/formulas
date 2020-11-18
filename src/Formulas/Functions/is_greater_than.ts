@@ -14,9 +14,8 @@ export default {
     context: AutomationContext | FormulaContext
   ) =>
     new Promise(async (resolve, reject) => {
-      const left = typeof fArgs[0] === "number" ? fArgs[0] : data[fArgs[0]];
-      const right = typeof fArgs[1] === "number" ? fArgs[1] : data[fArgs[1]];
-
+      const left = isNaN(parseInt(fArgs[0])) ? data[fArgs[0]] : fArgs[0];
+      const right = isNaN(parseInt(fArgs[1])) ? data[fArgs[1]] : fArgs[1];
       resolve(left > right);
     }),
   onCompile: (fArguments) => {

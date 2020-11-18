@@ -205,6 +205,8 @@ export default class Formula {
   // Use all the information available in this class after compilation and calculate it
   calculate = async (dataObj: {}, context: AutomationContext) =>
     new Promise(async (resolve, reject) => {
+      const localContext = { ...context };
+
       const data = { ...dataObj, __TODAY: new Date() };
       const regex = /\$___(?<tagName>.+?)___\$/gm;
       let r;
@@ -266,7 +268,7 @@ export default class Formula {
       let output: string | number | boolean = await tags.reduce(
         //@ts-ignore
         async (prev, tagId) => {
-          const localContext = { ...context }; // Because of the nature of this function and js async behavior we copy the values into a local context
+          const newlocalContext = { ...localContext }; // Because of the nature of this function and js async behavior we copy the values into a local context
           const reducingFormula = prev === tags[0] ? this.formula : await prev;
 
           let parsedTag;
@@ -288,7 +290,7 @@ export default class Formula {
             } else {
               if (tag.match(/\./)) {
                 //@ts-ignore
-                if (!context.object) {
+                if (!localContext.object) {
                   // To follow relationships we need values, and therefore we need a context object.
                   reject(
                     "Can't use foreign relationships in a contextless formula execution."
@@ -324,7 +326,7 @@ export default class Formula {
       resolve(output);
     });
 
-  processFunction = (fName, fArgs, data: {}, context: AutomationContext) =>
+  processFunction = (fName, fArgs, data: {}, localContext: AutomationContext) =>
     new Promise(async (resolve) => {
       //@ts-ignore
       const fArguments = fArgs.split(
@@ -345,7 +347,7 @@ export default class Formula {
               func.groups.fName,
               func.groups.fArgs,
               data,
-              context
+              localContext
             )
           );
         } else {
@@ -369,7 +371,7 @@ export default class Formula {
       }, fArguments[0]);
       if (functions[fName]) {
         resolve(
-          await functions[fName].execute(newArguments, data, this, context)
+          await functions[fName].execute(newArguments, data, this, localContext)
         );
       } else {
         console.log(`Uknown function ${fName}`);
