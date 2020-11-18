@@ -12,12 +12,16 @@ import Formula from "../../Formula";
 export default {
   execute: (fArgs, data, formula: Formula) =>
     new Promise((resolve) => {
-      const date =
-        typeof fArgs[0].str == "string"
+      let date = fArgs[0].str
+        ? typeof fArgs[0].str == "string"
           ? typeof data[fArgs[0].str] === "string"
             ? parseISO(data[fArgs[0].str])
             : data[fArgs[0].str]
-          : fArgs[0];
+          : fArgs[0]
+        : data[fArgs[0]];
+
+      if (typeof date === "string") date = parseISO(date);
+
       resolve(format(date, fArgs[1].str));
     }),
   onCompile: (fArguments) => {

@@ -40,13 +40,13 @@ export default class Formula {
   compile = () =>
     new Promise(async (resolve) => {
       // Extract {{ tags }}
-      const reg = new RegExp(/{{\s*(?<var>.*?)\s*}}/gm);
-      let result;
-      while ((result = reg.exec(this.formula))) {
-        const varName = uniqid();
-        this.tags.push({ tag: result.groups.var, identifier: varName });
-        this.formula = this.formula.replace(result[0], `$___${varName}___$`);
-      }
+      [...this.formula.matchAll(new RegExp(/{{\s*(?<var>.*?)\s*}}/gm))].map(
+        (match) => {
+          const varName = uniqid();
+          this.tags.push({ tag: match.groups.var, identifier: varName });
+          this.formula = this.formula.replace(match[0], `$___${varName}___$`);
+        }
+      );
 
       // Turn tags into dependencies
       //@ts-ignore
@@ -145,7 +145,7 @@ export default class Formula {
       // Step 1, process arguments
       // --> Split arguments based on comma
       const fArguments = fArgs.split(
-        /,(?!(?=[^"]*"[^"]*(?:"[^"]*"[^"]*)*$))(?![^\(]*\))(?![^\[]*\])/gm
+        /,(?!(?=[^"]*"[^"]*(?:"[^"]*"[^"]*)*$))(?![^\(]*\))(?![^\[]*\])(?![^\{]*\})/gm
       ); // Splits commas, except when they're in brackets or apostrophes
       const newArguments = [];
       // Loop through arguments (async) and if they are a function themselves, preprocess those first.
@@ -330,7 +330,7 @@ export default class Formula {
     new Promise(async (resolve) => {
       //@ts-ignore
       const fArguments = fArgs.split(
-        /,(?!(?=[^"]*"[^"]*(?:"[^"]*"[^"]*)*$))(?![^\(]*\))(?![^\[]*\])/gm
+        /,(?!(?=[^"]*"[^"]*(?:"[^"]*"[^"]*)*$))(?![^\(]*\))(?![^\[]*\])(?![^\{]*\})/gm
       ); // Splits commas, except when they're in brackets or apostrophes
       const newArguments = await fArguments.reduce(async (prev, curr) => {
         const output = typeof prev === "string" ? [] : await prev;

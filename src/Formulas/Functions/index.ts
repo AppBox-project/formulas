@@ -6,6 +6,7 @@ import equals from "./equals";
 import sum_of_fields from "./sum_of_fields";
 import is_greater_than from "./is_greater_than";
 import projected_sum_of_fields from "./projected_sum_of_fields";
+import forEach from "./forEach";
 
 export default {
   differenceInYears,
@@ -16,4 +17,5 @@ export default {
   sum_of_fields,
   is_greater_than,
   projected_sum_of_fields,
+  forEach,
 };
