@@ -144,17 +144,22 @@ export default class Formula {
     new Promise(async (resolve) => {
       // Step 1, process arguments
       // --> Split arguments based on comma
-      const fArguments = fArgs.split(/,(?![^\(]*\))(?![^\[]*")(?![^\[]*")/gm); // Splits commas, except when they're in brackets or apostrophes
+      const fArguments = fArgs.split(
+        /,(?!(?=[^"]*"[^"]*(?:"[^"]*"[^"]*)*$))(?![^\(]*\))(?![^\[]*\])/gm
+      ); // Splits commas, except when they're in brackets or apostrophes
       const newArguments = [];
       // Loop through arguments (async) and if they are a function themselves, preprocess those first.
       await fArguments.reduce(async (prev, curr) => {
+        await prev;
         const variable = curr.trim();
         if (variable.match(/\w*\(.+\)/)) {
           // This part has a function call. We need to preprocess these functions to figure out what the dependencies are.
           const func = new RegExp(/(?<fName>\w*)\((?<fArgs>.*)\)/gm).exec(curr);
-          await this.preprocessFunction(func.groups.fName, func.groups.fArgs);
-          // Todo: add compiled argument whereas possible
-          newArguments.push(variable);
+          const projectedResult = await this.preprocessFunction(
+            func.groups.fName,
+            func.groups.fArgs
+          );
+          newArguments.push(projectedResult);
         } else {
           if (variable.charAt(0) === '"' || variable.charAt(0) === "'") {
             newArguments.push({
@@ -169,7 +174,7 @@ export default class Formula {
 
       // Done looping, now preprocess the function
       if (functions[fName]) {
-        const deps = functions[fName].onCompile(newArguments);
+        const deps = await functions[fName].onCompile(newArguments);
         deps.map((dep) => {
           if (typeof dep === "string") {
             // Check if one of the dependencies returned is a systemVar. These still need a value.
@@ -190,10 +195,11 @@ export default class Formula {
             this.dependencies.push(dep);
           }
         });
+        resolve(functions[fName].returnPreview);
       } else {
         console.log(`Unknown function ${fName}`);
+        resolve();
       }
-      resolve();
     });
 
   // Use all the information available in this class after compilation and calculate it
@@ -206,6 +212,55 @@ export default class Formula {
       while ((r = regex.exec(this.formula)) !== null) {
         tags.push(r.groups.tagName);
       }
+
+      // Before we start parsing all the tags, we'll go through all of our dependencies, to see if there's any foreign relations (user_r.first_name).
+      // We'll resolve those to their actual data.
+      //@ts-ignore
+      await this.dependencies.reduce(async (prev, curr) => {
+        await prev;
+
+        // If this is a local relationship with a dot.
+        if (curr.foreign === false) {
+          if (curr.field.match(/\./)) {
+            // Walk through the path, part by part.
+            const fullPath = curr.field;
+            const path = fullPath.split(/\./m);
+
+            let firstStep = true;
+            // When a value returns the async reduce, we map it into the data object as a full string.
+            // @ts-ignore
+            data[fullPath] = await path.reduce(async (prev, pathPart) => {
+              let currObject;
+
+              // First step: get the given objects
+              if (firstStep) {
+                firstStep = false;
+                currObject = context.object;
+              } else {
+                // Steps following it, get the result from the previous promise.
+                currObject = await prev;
+              }
+
+              let action = prev;
+              if (pathPart.match("_r")) {
+                // First or middle, find the next object
+
+                action = await this.models.objects.model.findOne({
+                  _id: currObject.data[pathPart.replace("_r", "")],
+                });
+              } else {
+                action = currObject.data[pathPart];
+              }
+
+              return action;
+            }, path[0]);
+          }
+        }
+
+        return curr;
+      }, this.dependencies[0]);
+
+      // We now have mapped all the foreign relations to their actual values
 
       // Parse all tags
       let output: string | number | boolean = await tags.reduce(
@@ -272,7 +327,9 @@ export default class Formula {
   processFunction = (fName, fArgs, data: {}, context: AutomationContext) =>
     new Promise(async (resolve) => {
       //@ts-ignore
-      const fArguments = fArgs.split(/,(?![^\(]*\))(?![^\[]*")(?![^\[]*")/gm); // Splits commas, except when they're in brackets or apostrophes
+      const fArguments = fArgs.split(
+        /,(?!(?=[^"]*"[^"]*(?:"[^"]*"[^"]*)*$))(?![^\(]*\))(?![^\[]*\])/gm
+      ); // Splits commas, except when they're in brackets or apostrophes
       const newArguments = await fArguments.reduce(async (prev, curr) => {
         const output = typeof prev === "string" ? [] : await prev;
         let variable = curr.trim(); // Remove spaces and trailing apostrophes
