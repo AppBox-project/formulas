@@ -228,7 +228,7 @@ export default class Formula {
         await prev;
 
         // If this is a local relationship with a dot.
-        if (curr.foreign === false) {
+        if (curr?.foreign === false) {
           if (curr.field.match(/\./)) {
             // Walk through the path, part by part.
             const fullPath = curr.field;

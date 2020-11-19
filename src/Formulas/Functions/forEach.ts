@@ -41,14 +41,14 @@ export default {
         await objects.reduce(async (prev, object) => {
           await prev;
 
-          const formula = new Formula(
+          const subFormula = new Formula(
             fArgs[1],
             model,
             context.models,
             uniqid()
           );
-          await formula.compile("[[");
-          const compiledFormula = await formula.calculate(object.data, {
+          await subFormula.compile("[[");
+          const compiledFormula = await subFormula.calculate(object.data, {
             models: context.models,
             object,
           });
