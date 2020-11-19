@@ -20,6 +20,7 @@ export default class Formula {
   systemVars = { __TODAY: new Date() };
   systemVarTriggers = { __TODAY: { cron: "0 0 * * *" } };
   timeTriggers = [];
+  tagWrapper: "{{" | "[[" = "{{";
 
   constructor(
     formula: string,
@@ -37,16 +38,21 @@ export default class Formula {
 
   // Compiling a formula
   // --> This function turns a formula (this.formula) into dependencies and caches the models along the way.
-  compile = () =>
+  compile = (tags?: "{{" | "[[") =>
     new Promise(async (resolve) => {
+      // Choose the appropriate regexp for the tags.
+      const regexp =
+        tags === "[["
+          ? new RegExp(/\[\[\s*(?<var>.*?)\s*\]\]/gm)
+          : new RegExp(/{{\s*(?<var>.*?)\s*}}/gm);
+      this.tagWrapper = tags;
+
       // Extract {{ tags }}
-      [...this.formula.matchAll(new RegExp(/{{\s*(?<var>.*?)\s*}}/gm))].map(
-        (match) => {
-          const varName = uniqid();
-          this.tags.push({ tag: match.groups.var, identifier: varName });
-          this.formula = this.formula.replace(match[0], `$___${varName}___$`);
-        }
-      );
+      [...this.formula.matchAll(regexp)].map((match) => {
+        const varName = uniqid();
+        this.tags.push({ tag: match.groups.var, identifier: varName });
+        this.formula = this.formula.replace(match[0], `$___${varName}___$`);
+      });
 
       // Turn tags into dependencies
       //@ts-ignore

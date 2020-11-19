@@ -1,6 +1,6 @@
 {
   "name": "appbox-formulas",
-  "version": "0.0.34",
+  "version": "0.0.35",
   "description": "Compiles AppBox-Formulas",
   "main": "dist/index.js",
   "repository": "https://github.com/AppBox-project/formulas",
