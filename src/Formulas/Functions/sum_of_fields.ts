@@ -58,4 +58,6 @@ export default {
     });
     return [{ model: model, field: field, foreign: true }, ...requirements];
   },
+  // Give a sample result so it's parent functions know what we will return on execute and can perform the right precompiling.
+  returnPreview: 0,
 };

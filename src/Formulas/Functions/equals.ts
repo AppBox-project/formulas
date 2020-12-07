@@ -1,5 +1,4 @@
 import { AutomationContext, FormulaContext } from "appbox-types";
-import { resolve } from "path";
 import Formula from "../../Formula";
 
 /*
@@ -31,4 +30,6 @@ export default {
 
     return deps;
   },
+  // Give a sample result so it's parent functions know what we will return on execute and can perform the right precompiling.
+  returnPreview: true,
 };

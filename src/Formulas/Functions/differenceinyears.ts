@@ -28,4 +28,6 @@ export default {
     // Mark argument 0 and 1 as required
     return [fArguments[0].trim(), fArguments[1].trim()];
   },
+  // Give a sample result so it's parent functions know what we will return on execute and can perform the right precompiling.
+  returnPreview: 0,
 };

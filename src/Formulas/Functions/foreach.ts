@@ -63,4 +63,6 @@ export default {
   onCompile: (fArguments) => {
     return [];
   },
+  // Give a sample result so it's parent functions know what we will return on execute and can perform the right precompiling.
+  returnPreview: "string",
 };
