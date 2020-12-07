@@ -179,8 +179,10 @@ export default class Formula {
       }, fArguments[0]);
 
       // Done looping, now preprocess the function
-      if (functions[fName]) {
-        const deps = await functions[fName].onCompile(newArguments);
+      if (functions[fName.toLowerCase()]) {
+        const deps = await functions[fName.toLowerCase()].onCompile(
+          newArguments
+        );
         deps.map((dep) => {
           if (typeof dep === "string") {
             // Check if one of the dependencies returned is a systemVar. These still need a value.
@@ -201,7 +203,7 @@ export default class Formula {
             this.dependencies.push(dep);
           }
         });
-        resolve(functions[fName].returnPreview);
+        resolve(functions[fName.toLowerCase()].returnPreview);
       } else {
         console.log(`Unknown function ${fName}`);
         resolve();
@@ -375,9 +377,14 @@ export default class Formula {
         }
         return output;
       }, fArguments[0]);
-      if (functions[fName]) {
+      if (functions[fName.toLowerCase()]) {
         resolve(
-          await functions[fName].execute(newArguments, data, this, localContext)
+          await functions[fName.toLowerCase()].execute(
+            newArguments,
+            data,
+            this,
+            localContext
+          )
         );
       } else {
         console.log(`Uknown function ${fName}`);

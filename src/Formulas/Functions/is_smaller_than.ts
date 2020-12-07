@@ -1,11 +1,10 @@
 import { AutomationContext, FormulaContext } from "appbox-types";
 import { parseISO } from "date-fns";
-import { LOADIPHLPAPI } from "dns";
 import Formula from "../../Formula";
 
 /*
- * is_greater_than(left, right)
- * returns true if left is greater than right
+ * is_smaller_than(left, right)
+ * returns true if left is smaller than right
  */
 
 export default {
@@ -34,10 +33,10 @@ export default {
         typeof left.getMonth === "function" &&
         typeof right.getMonth === "function"
       ) {
-        resolve(left.getTime() > right.getTime());
+        resolve(left.getTime() < right.getTime());
       } else {
         // Every other comparison.
-        resolve(left > right);
+        resolve(left < right);
       }
     }),
   onCompile: (fArguments) => {
