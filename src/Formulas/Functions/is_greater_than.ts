@@ -44,8 +44,10 @@ export default {
     const deps = [];
 
     // For each argument, check if their type is string (so not a "string", but a string). If so, it refers to a field and is a dependency.
-    if (typeof fArguments[0] === "string") deps.push(fArguments[0]);
-    if (typeof fArguments[1] === "string") deps.push(fArguments[1]);
+    if (typeof fArguments[0] === "string" && isNaN(parseInt(fArguments[0])))
+      deps.push(fArguments[0]);
+    if (typeof fArguments[1] === "string" && isNaN(parseInt(fArguments[1])))
+      deps.push(fArguments[1]);
 
     return deps;
   },

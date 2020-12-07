@@ -22,11 +22,11 @@ export default {
       if (!context.object) {
         reject("This formula is ran without object context ");
       } else {
-        const modelKey = fArgs[0];
-        const fieldKey = fArgs[1];
+        const modelKey = fArgs[0].str ? fArgs[0].str : fArgs[0];
+        const fieldKey = fArgs[1].str ? fArgs[1].str : fArgs[1];
         const criteria = {};
 
-        JSON.parse(fArgs[2]).map(
+        JSON.parse(fArgs[2] || []).map(
           (crit) => (criteria[`data.${crit.field}`] = crit.value)
         );
 
@@ -42,15 +42,16 @@ export default {
   onCompile: (fArguments) => {
     // Add a foreign relationship to the field key and add an additional field for each requirement ([2])
     const requirements = [];
+
     JSON.parse(fArguments[2]).map((dep) => {
       requirements.push({
-        model: fArguments[0],
+        model: fArguments[0].str,
         field: dep.field,
         foreign: true,
       });
     });
     return [
-      { model: fArguments[0], field: fArguments[1], foreign: true },
+      { model: fArguments[0].str, field: fArguments[1].str, foreign: true },
       ...requirements,
     ];
   },

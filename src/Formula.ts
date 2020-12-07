@@ -139,7 +139,7 @@ export default class Formula {
       }, this.tags[0]);
 
       // Done
-      console.log(`--> 🧪 Formula '${this.name}' compiled.`);
+      console.log(`--> 🧪 Formula '${this.name}' compiled.`, this.dependencies);
       resolve();
     });
 
