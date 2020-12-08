@@ -139,7 +139,7 @@ export default class Formula {
       }, this.tags[0]);
 
       // Done
-      console.log(`--> 🧪 Formula '${this.name}' compiled.`, this.dependencies);
+      console.log(`--> 🧪 Formula '${this.name}' compiled.`);
       resolve();
     });
 
@@ -330,7 +330,8 @@ export default class Formula {
         output = !isNaN(output) ? parseInt(output) : 0;
       if (this.outputType === "boolean")
         //@ts-ignore
-        output = output === "true" ? true : false;
+        output = output.trim().toLowerCase() === "true" ? true : false;
+
       resolve(output);
     });
 
