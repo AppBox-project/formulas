@@ -32,7 +32,7 @@ export default class Formula {
     this.formula = formula;
     this.model = model;
     this.name = name;
-    this.modelCache[model.key] = model;
+    this.modelCache[model?.key] = model;
     this.models = models;
   }
 
@@ -72,7 +72,7 @@ export default class Formula {
           } else if (part.match(/\./)) {
             // A dot part indicates a foreign relationship.
             const ps = part.split(".");
-            let currentModel = this.model.key;
+            let currentModel = this.model?.key;
             //@ts-ignore
             await ps.reduce(async (prev, curr) => {
               //@ts-ignore
