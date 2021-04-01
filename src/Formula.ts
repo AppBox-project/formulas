@@ -147,7 +147,7 @@ export default class Formula {
   // -> Runs the func's preprocess call and returns it's dependencies
   // Also already parses the arguments
   preprocessFunction = (fName, fArgs) =>
-    new Promise(async (resolve) => {
+    new Promise<void>(async (resolve) => {
       // Step 1, process arguments
       // --> Split arguments based on comma
       const fArguments = fArgs.split(
@@ -188,7 +188,7 @@ export default class Formula {
             // Check if one of the dependencies returned is a systemVar. These still need a value.
             if (!Object.keys(this.systemVars).includes(dep)) {
               this.dependencies.push({
-                model: this.model.key,
+                model: this.model?.key,
                 field: dep.trim(),
                 foreign: false,
               });

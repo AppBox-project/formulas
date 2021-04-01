@@ -13,6 +13,7 @@ import contains from "./contains";
 import currency_format from "./currency_format";
 import and from "./and";
 import or from "./or";
+import id from "./id";
 
 export default {
   differenceinyears,
@@ -30,4 +31,5 @@ export default {
   currency_format,
   and,
   or,
+  id,
 };
