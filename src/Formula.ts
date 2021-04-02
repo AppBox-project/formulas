@@ -1,6 +1,6 @@
 import { ModelType } from "appbox-types";
 import { AutomationContext } from "./Types";
-import DatabaseModel from "appbox-types/dist/Classes/DatabaseModel";
+import DatabaseModel from "./Classes/DatabaseModel";
 import functions from "./Formulas/Functions";
 import { find } from "lodash";
 
@@ -39,7 +39,7 @@ export default class Formula {
   // Compiling a formula
   // --> This function turns a formula (this.formula) into dependencies and caches the models along the way.
   compile = (tags?: "{{" | "[[") =>
-    new Promise(async (resolve) => {
+    new Promise<void>(async (resolve) => {
       // Choose the appropriate regexp for the tags.
       const regexp =
         tags === "[["
@@ -336,7 +336,7 @@ export default class Formula {
     });
 
   processFunction = (fName, fArgs, data: {}, localContext: AutomationContext) =>
-    new Promise(async (resolve) => {
+    new Promise<void>(async (resolve) => {
       //@ts-ignore
       const fArguments = fArgs.split(
         /,(?!(?=[^"]*"[^"]*(?:"[^"]*"[^"]*)*$))(?![^\(]*\))(?![^\[]*\])(?![^\{]*\})/gm
