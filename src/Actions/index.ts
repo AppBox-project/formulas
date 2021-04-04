@@ -12,16 +12,17 @@ export default class Action {
     this.models = models;
   }
 
-  async execute() {
-    await new ActionInstance(this).execute();
+  async execute(vars?) {
+    return await new ActionInstance(this, vars).execute();
   }
 }
 
 export class ActionInstance {
   action: Action;
-  vars = {};
+  vars: {};
 
-  constructor(action) {
+  constructor(action, vars?) {
+    this.vars = { ...(vars || {}) };
     this.action = action;
     // Instantiate setting values (given by the admin)
     map(this.action.action.data.vars, (v, vKey) => {
@@ -62,5 +63,9 @@ export class ActionInstance {
     console.log(`Action succesfully executed.`);
 
     return this;
+  }
+
+  getVar(varName: string) {
+    return this.vars[varName];
   }
 }

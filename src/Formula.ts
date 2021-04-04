@@ -388,7 +388,7 @@ export default class Formula {
           )
         );
       } else {
-        console.log(`Uknown function ${fName}`);
+        console.log(`Unknown function ${fName}`);
         resolve();
       }
     });

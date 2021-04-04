@@ -14,6 +14,9 @@ import currency_format from "./currency_format";
 import and from "./and";
 import or from "./or";
 import id from "./id";
+import value from "./value";
+import increase from "./increase";
+import object from "./object";
 
 export default {
   differenceinyears,
@@ -32,4 +35,7 @@ export default {
   and,
   or,
   id,
+  value,
+  increase,
+  object,
 };
