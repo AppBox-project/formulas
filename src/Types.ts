@@ -14,6 +14,9 @@ export interface ActionStepType {
     model?: string;
     newObject?: {};
   };
+  var?: string;
+  steps?: ActionStepType[];
+
   cases?: {
     criteria: [];
     label: string;

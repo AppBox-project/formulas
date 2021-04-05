@@ -13,6 +13,15 @@ export default (step: ActionStepType, actionInstance: ActionInstance) =>
         deleteCriteria
       );
     } else {
-      console.log("Todo: delete specific variable");
+      const toDelete = actionInstance.vars[step.args.varName];
+      if (typeof toDelete === "string") {
+        await actionInstance.action.models.objects.model.deleteOne({
+          _id: toDelete,
+        });
+      } else {
+        await actionInstance.action.models.objects.model.deleteMany({
+          _id: { $in: toDelete },
+        });
+      }
     }
   });

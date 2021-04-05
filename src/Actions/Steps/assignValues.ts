@@ -13,7 +13,7 @@ export default (step: ActionStepType, actionInstance: ActionInstance) =>
 
         const v = actionInstance.action.action.data.vars[currKey];
 
-        if (v.type === "object") {
+        if (v?.type === "object" || currKey.match("loop_current")) {
           // Parse all formulas
           await Object.keys(value).reduce(
             //@ts-ignore
@@ -29,17 +29,17 @@ export default (step: ActionStepType, actionInstance: ActionInstance) =>
                   uniqid()
                 );
                 await formula.compile();
+
                 const result = await formula.calculate(actionInstance.vars, {
                   models: actionInstance.action.models,
                 });
-                value[currValueKey] = result;
+                actionInstance.vars[currKey].data[currValueKey] = result;
               }
 
               return currValueKey;
             },
             Object.keys(value)[0]
           );
-          actionInstance.setVar(currKey, { data: value, objectId: v.model });
         } else {
           actionInstance.setVar(currKey, value);
         }
