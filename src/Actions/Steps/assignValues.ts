@@ -33,7 +33,12 @@ export default (step: ActionStepType, actionInstance: ActionInstance) =>
                 const result = await formula.calculate(actionInstance.vars, {
                   models: actionInstance.action.models,
                 });
-                actionInstance.vars[currKey].data[currValueKey] = result;
+
+                if (actionInstance.vars[currKey].data) {
+                  actionInstance.vars[currKey].data[currValueKey] = result;
+                } else {
+                  actionInstance.vars[currKey][currValueKey] = result;
+                }
               }
 
               return currValueKey;
