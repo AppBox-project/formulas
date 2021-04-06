@@ -4,8 +4,11 @@ import StepFunctions from ".";
 
 export default (step: ActionStepType, actionInstance: ActionInstance) =>
   new Promise<void>(async (resolve, reject) => {
+    const v = actionInstance.action.action.data.vars[step.var];
+    console.log(v);
+
     const model = await actionInstance.action.models.models.model.findOne({
-      key: step.args.model,
+      key: v.model,
     });
     const varName = `loop_current_${model.key}`;
     let index = 0;
